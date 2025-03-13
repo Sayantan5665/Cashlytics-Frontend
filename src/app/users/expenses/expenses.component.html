@@ -1,0 +1,444 @@
+@let _user = user();
+@let _filterOption = filterOption();
+@let _expenses = expenses.value()?.data || {};
+@let _expensesList = _expenses?.docs || [];
+@let _categories = categories.value()?.data || [];
+@let _ownCategories = ownCategories.value()?.data || [];
+
+<!-- Upper div -->
+<div class="mx-auto mb-5 flex flex-col lg:flex-row gap-5 justify-between main-upper-container">
+  <!-- Left box -->
+  <div class="left-card w-full h-auto rounded-lg py-10 px-5 cards">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8">
+      <h1
+        class="text-3xl font-bold text-gray-800 bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">
+        Transaction History
+      </h1>
+    </div>
+
+    <!-- Filter and Sort Section (Above Table Header) -->
+    <div class="flex flex-col md:flex-row gap-4">
+      <!-- Filter by Category -->
+      <div class="flex-1">
+        <label for="category"
+          class="block text-sm font-medium text-gray-700 mb-2">Filter by
+          Category</label>
+        <select id="category" [(ngModel)]="_filterOption.categoryId"
+          (change)="expenses.reload()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          <option value>All Categories</option>
+          @for (category of _categories; track category) {
+          <option [value]="category?._id">{{category?.name}}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Filter by Type -->
+      <div class="flex-1">
+        <label for="category"
+          class="block text-sm font-medium text-gray-700 mb-2">Filter by
+          Type</label>
+        <select id="category" [(ngModel)]="_filterOption.type"
+          (change)="expenses.reload()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+          <option value>All</option>
+          <option value="cash-in">Cash In</option>
+          <option value="cash-out">Cash Out</option>
+        </select>
+      </div>
+
+      <!-- Date Range Picker -->
+      <div class="flex-1 expense-range-picker">
+        <label for="dateRange"
+          class="block text-sm font-medium text-gray-700 mb-2">Date
+          Range</label>
+        <mat-form-field appearance="outline" class="w-full sm:!min-w-[285px]">
+          <mat-date-range-input [rangePicker]="rangePicker"
+            (click)="rangePicker.open()">
+            <input matStartDate placeholder="Start date"
+              [(ngModel)]="_filterOption.startDate" readonly>
+            <input matEndDate placeholder="End date"
+              [(ngModel)]="_filterOption.endDate" readonly>
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix
+            [for]="rangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #rangePicker>
+            <mat-date-range-picker-actions>
+              <button mat-button matDateRangePickerCancel>Cancel</button>
+              <button mat-raised-button matDateRangePickerApply
+                (click)="expenses.reload()">Apply</button>
+            </mat-date-range-picker-actions>
+          </mat-date-range-picker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Expense List Table -->
+    <div class="bg-white rounded-lg shadow-lg ">
+      <div
+        class="rounded-lg w-full h-[500px] overflow-y-auto overflow-x-auto thin-scrollbar">
+        <table class="w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-teal-400 to-blue-400">
+            <tr>
+              <th scope="col"
+                class=" text-left text-xs font-medium text-white uppercase tracking-wider"></th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Date
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Category
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Description
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Amount
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+
+            @for (expense of _expensesList | paginate: {itemsPerPage:
+            _expenses?.limit||10, totalItems: _expenses?.totalDocs, currentPage:
+            _expenses?.page }; track expense) {
+            <tr class="hover:bg-gray-50 transition-colors duration-200">
+              <td class="pl-6 whitespace-nowrap text-sm text-gray-500">
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center"
+                  [ngStyle]="{ 'background': expense?.type === 'cash-in' ? '#9FE2BF' : '#f1958b' }">
+                  <mat-icon class="material-symbols-outlined">{{expense?.type
+                    === 'cash-in'? 'trending_up' : 'trending_down'}}</mat-icon>
+                </div>
+              </td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{expense?.date
+                | date: 'dd MMMM'}}</td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                <span class=" py-[3px] px-[8px] rounded inline-block !max-w-[200px] overflow-hidden text-ellipsis" [ngStyle]="{'background': hexToRgba(expense?.category?.color?.hexCode || '#E0E0E0', 0.5)}">
+                  {{expense?.category?.name || '_'}}
+                </span>
+                </td>
+              <td
+                class="px-6 py-4 max-w-50 whitespace-nowrap text-sm text-gray-900 overflow-hidden text-ellipsis">{{expense?.description
+                || '_'}}</td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{{expense?.amount
+                | currency:'INR':'symbol'}}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <a [routerLink]="'/expense/'+expense?._id"
+                  class="mr-2 bg-[#ffe77fbf] py-[8px] px-[15px] rounded-lg shadow-lg">View</a>
+                <a class="bg-[#ff7f7fbf] py-[8px] px-[15px] rounded-lg shadow-lg" (click)="deleteExpense(expense?._id)">Delete</a>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td
+                class="pl-6 whitespace-nowrap text-sm text-gray-500 text-center pt-[200px]"
+                colspan="6">No data found!</td>
+            </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div
+      class="mt-4 px-6 py-4 bg-white rounded-lg shadow-lg flex flex-col md:flex-row items-center justify-between">
+      @if (_filterOption?.type != 'cash-out') {
+      <p class="text-gray-700">Credit: {{(_expenses?.report?.totalCashIn || 0) |
+        currency: 'INR' : 'symbol'}}</p>
+      } @else { <p class="text-gray-700"></p> }
+
+      @if (_filterOption?.type !== 'cash-in') {
+      <p class="text-gray-700">Expenses: {{(_expenses?.report?.totalCashOut ||
+        0) | currency: 'INR' : 'symbol'}}</p>
+      } @else { <p class="text-gray-700"></p> }
+
+      @if(!_filterOption?.type?.length && !_filterOption?.categoryId?.length) {
+      <p class="text-gray-700">Remaining: {{(_expenses?.report?.remainingCash ||
+        0) | currency: 'INR' : 'symbol'}}</p>
+      } @else { <p class="text-gray-700"></p> }
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      <div
+        class="flex flex-col-reverse md:flex-row justify-between items-center">
+        <div class="w-[100px] h-2 hidden lg:block xl:block 2xl:block"></div>
+        @if (true) {
+        <div class="pagination-wrap">
+          <pagination-controls #pagination [autoHide]="true"
+            (pageChange)="pageChangeEvent($event)" [maxSize]="5"
+            [previousLabel]="''" [nextLabel]="''"></pagination-controls>
+        </div>
+        }
+        <div class="flex items-center">
+          <div class="flex justify-center items-center">
+            <span>Show:</span>
+            <select
+              class="per-page-select max-w-[78px] !bg-transparent !border-none"
+              [(ngModel)]="_filterOption.limit"
+              (change)="limitChange()">
+              <option [value]="10">10</option>
+              <option [value]="25">25</option>
+              <option [value]="50">50</option>
+              <option [value]="100">100</option>
+              <option [value]="500">500</option>
+            </select>
+          </div>
+
+          <div class="__screenLabel">
+            {{ _expenses.page||1 * _expenses.limit||10 - (_expenses.limit||10) +
+            1 }} -
+            {{
+            _expenses.page||1 * _expenses.limit||10 > _expenses?.totalDocs||0
+            ? _expenses?.totalDocs||0
+            : _expenses.page||1 * _expenses.limit||10
+            }}
+            of {{ _expenses?.totalDocs||0 }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right box -->
+  <div class="right-card w-full md:min-w-[350px] lg:max-w-130 h-auto rounded-lg px-5 py-10 cards">
+    <h1
+      class="text-3xl text-center font-bold text-gray-800 bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">
+      Add New Transaction
+    </h1>
+    <!-- Add Expense Form -->
+    <div class="mt-8 p-6 bg-white rounded-lg shadow-lg">
+      <form class="space-y-6" [formGroup]="form" id="add-expense-form">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="expense-add-datepicker input-field"
+            [class.error-field]="form.controls['date'].touched && form.controls['date'].hasError('required')">
+            <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+            <mat-form-field appearance="outline" class="w-full">
+              <input matInput placeholder="mm/dd/yyyy" [matDatepicker]="picker2" readonly (click)="picker2.open()" formControlName="date">
+              <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+              <mat-datepicker #picker2 disabled="false"></mat-datepicker>
+            </mat-form-field>
+            <div class="error-msg">
+              @if(form.controls['date'].touched && form.controls['date'].hasError('required')) {
+              <p>Date is required!</p>
+              }
+            </div>
+          </div>
+          <div class="input-field"
+            [class.error-field]="form.controls['categoryId'].touched && form.controls['categoryId'].hasError('required')">
+            <label for="category"
+              class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+            <select id="category" formControlName="categoryId"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              <option disabled label="Select a category"></option>
+              @for (category of _categories; track category) {
+              <option [value]="category?._id">{{category?.name}}</option>
+              }
+            </select>
+            <div class="error-msg">
+              @if(form.controls['categoryId'].touched && form.controls['categoryId'].hasError('required')) {
+              <p>Category is required!</p>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="input-field"
+          [class.error-field]="form.controls['type'].touched && form.controls['type'].hasError('required')">
+          <label for="expenseType"
+            class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+          <select id="expenseType" formControlName="type"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            <option value="cash-in">Cash In</option>
+            <option value="cash-out">Cash Out</option>
+          </select>
+          <div class="error-msg">
+            @if(form.controls['type'].touched && form.controls['type'].hasError('required')) {
+              <p>Type is required!</p>
+            }
+          </div>
+        </div>
+        <div class="input-field">
+          <label for="description"
+            class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+          <input type="text" id="description" formControlName="description"
+            placeholder="Description"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+        </div>
+        <div class="input-field" [class.error-field]="form.controls['amount'].touched && (form.controls['amount'].hasError('required') || form.controls['amount'].hasError('pattern'))">
+          <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+          <input type="number" id="amount" formControlName="amount"
+            placeholder="Amount"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+            <div class="error-msg">
+              @if(form.controls['amount'].touched && form.controls['amount'].hasError('required')) {
+                <p>Amount is required!</p>
+              }
+              @if(form.controls['amount'].touched && form.controls['amount'].hasError('pattern')) {
+                <p>Invalid amount format!</p>
+              }
+            </div>
+        </div>
+        <!-- File Upload Field -->
+        @let _documentArray = documentArray();
+        <div class="input-field file-input"  [class.error-field]="_documentArray.length > 5">
+          <label for="fileUpload"
+            class="block text-sm font-medium text-gray-700 mb-2">Upload
+            Files</label>
+          <input type="file" id="fileUpload" name="fileUpload" #documentInput
+            [multiple]="true"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml,image/webp,image/apng,application/pdf,application/msword,application/vnd.ms-excel,application/wps-office.xlsx,text/csv,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/wps-office.docx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            (change)="documentUploadHandeler($event, documentInput)" />
+          <div class="error-msg">
+            @if(_documentArray.length > 5) {
+              <p>Maximum 5 documents can be uploaded</p>
+            }
+          </div>
+          <p class="text-sm text-gray-500 mt-1">Upload receipts or related
+            documents (Image, PDF, DOC, Sheet). [Maximum size: 25mb]</p>
+          <div style="border: 1px solid #d4d4d4;"
+            class="rounded-lg w-full h-[70px] overflow-y-auto bg-gray-100 thin-scrollbar uploaded-file-list-viewer">
+            <ul class="pl-6" style="list-style-type: circle !important;">
+
+              @for (doc of _documentArray; track doc) {
+                <li class="flex justify-between items-center gap-3 px-2">
+                  <div class="flex flex-grow">
+                    <span class="mt-[1px]">•&nbsp;</span>
+                    <!-- <span class="text-sm text-gray-700 flex-grow">{{doc?.name}}</span> -->
+                    <span MiddleEllipsis class="text-sm text-gray-700">{{doc?.name}}</span>
+                  </div>
+                  <a class="text-xs text-red-500 whitespace-nowrap hover:cursor-pointer" (click)="removeUploadedFiles($index, documentInput)"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></a>
+                </li>
+              } @empty {
+              <p class="text-sm text-gray-500 text-center mt-6">No documents
+                uploaded</p>
+              }
+
+            </ul>
+          </div>
+        </div>
+        <button type="submit" (click)="submit(form, documentInput)"
+          class="w-full px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all duration-300 shadow-md hover:shadow-lg">
+          Add
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Lower div -->
+<div class="mx-auto mb-10 pb-4 main-lower-container">
+  <div class="left-card w-full h-auto rounded-lg py-10 px-5 cards">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 relative gap-2">
+      <h1
+        class="text-3xl font-bold text-gray-800 bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">
+        Your Categories
+      </h1>
+      <div class="search-box">
+        <input type="text" placeholder="Search Categories" [(ngModel)]="searchCategoryText"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+      </div>
+      <button type="submit" style="background-color: #4FA5FF;" (click)="addCategory(false)"
+        class="w-30 px-6 py-2 text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg">
+        Add New
+      </button>
+    </div>
+
+    <!-- Category List Table -->
+    <div class="bg-white rounded-lg shadow-lg ">
+      <div
+        class="rounded-lg w-full h-[300px] overflow-y-auto overflow-x-auto thin-scrollbar">
+        <table class="w-full divide-y divide-gray-200">
+          <thead class="bg-gradient-to-r from-teal-400 to-blue-400">
+            <tr>
+              <th scope="col"
+                class=" text-left text-xs font-medium text-white uppercase tracking-wider"></th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Name
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Description
+              </th>
+              @if(_user && _user.role?.toLowerCase() == "admin") {
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Default
+              </th>
+              }
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Created By
+              </th>
+              <th scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+
+            @for (category of _ownCategories; track category) {
+            <tr class="hover:bg-gray-50 transition-colors duration-200">
+              <td class="pl-6 whitespace-nowrap text-sm text-gray-500">
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center"
+                  [ngStyle]="{ 'background': category?.color?.hexCode || '#E0E0E0' }">
+                </div>
+              </td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                {{category?.name || '_'}}
+              </td>
+              <td
+                class="px-6 py-4 max-w-50 whitespace-nowrap text-sm text-gray-900 overflow-hidden text-ellipsis">
+                {{category?.description || '_'}}
+              </td>
+              @if(_user && _user.role?.toLowerCase() == "admin") {
+              <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <span class=" py-[3px] px-[8px] rounded" [class]="!!category?.isDefault ? 'bg-[#61ff78bf]' : 'bg-[#cececebf]'">{{!!category?.isDefault}}</span>
+              </td>
+              }
+              <td
+                class="px-6 py-4 max-w-45 whitespace-nowrap text-sm text-gray-900 overflow-hidden text-ellipsis">
+                {{category?.user?.name || '_'}}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <a (click)="addCategory(true, category)"
+                  class="mr-2 bg-[#ffe77fbf] py-[8px] px-[15px] rounded-lg shadow-lg">Edit</a>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td
+                class="pl-6 whitespace-nowrap text-sm text-gray-500 text-center pt-[110px]"
+                [attr.colspan]="_user && _user.role?.toLowerCase() === 'admin' ? '6' : '5'">
+                You haven't created any categories yet.
+              </td>
+            </tr>
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

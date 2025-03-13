@@ -1,0 +1,32 @@
+<!-- <mat-dialog-content class="mat-typography"> -->
+@let _result = result();
+<div class="calculator" #calculator>
+  <div class="calculator__wrap">
+    <div class="calculator__display">
+      <input #calcInput type="text" inputmode="none" [class.has-result]="!!_result.length" [(ngModel)]="currentInput" (keydown)="numbersOnly($event)">
+      <p class="result" id="resultElement" [ngStyle]="{'display': _result.length ? 'block' : 'none'}">{{ _result }}</p>
+    </div>
+    <div class="calculator__functions">
+      <button (click)="clear('all', calcInput)" class="btn--opaque">AC</button>
+      <button (click)="appendValue('%', calcInput)" class="btn--opaque">%</button>
+      <button (click)="appendValue('/', calcInput)" class="btn--opaque">/</button>
+      <button (click)="clear('single', calcInput)" class="btn--opaque"><mat-icon class="material-symbols-outlined">backspace</mat-icon></button>
+      <button (click)="appendValue('7', calcInput)">7</button>
+      <button (click)="appendValue('8', calcInput)">8</button>
+      <button (click)="appendValue('9', calcInput)">9</button>
+      <button (click)="appendValue('*', calcInput)" class="btn--opaque">*</button>
+      <button (click)="appendValue('4', calcInput)">4</button>
+      <button (click)="appendValue('5', calcInput)">5</button>
+      <button (click)="appendValue('6', calcInput)">6</button>
+      <button (click)="appendValue('-', calcInput)" class="btn--opaque">-</button>
+      <button (click)="appendValue('1', calcInput)">1</button>
+      <button (click)="appendValue('2', calcInput)">2</button>
+      <button (click)="appendValue('3', calcInput)">3</button>
+      <button (click)="appendValue('+', calcInput)" class="btn--opaque">+</button>
+      <button (click)="appendValue('0', calcInput)" class="btn--large">0</button>
+      <button (click)="appendValue('.', calcInput)">.</button>
+      <button (click)="calculate()" class="btn--opaque">=</button>
+    </div>
+  </div>
+</div>
+<!-- </mat-dialog-content> -->

@@ -1,0 +1,159 @@
+@let _step = step();
+@let _expenses = expenses();
+
+<div mat-dialog-title>
+  <div class="dialog_header">
+    <div class="details_wrapper">
+      <h4 class="presentation_name">Statement Details</h4>
+    </div>
+    <div class="btn-wrapper">
+      @if(_step == 2) {
+      <div class="btn_holder">
+        @let _sendingMailLoader = sendingMailLoader();
+        <button type="button" class="send_email_btn" (click)="exportOrEmailStatement(true)" [disabled]="_sendingMailLoader">
+          @if(_sendingMailLoader) {
+            <mat-spinner class="spinner" diameter="20"></mat-spinner>
+            <span>Sending...</span>
+          } @else {
+          <mat-icon class="material-symbols-outlined">mail</mat-icon>
+          <span>Send over mail</span>
+          }
+        </button>
+        <button type="button" class="download_btn" (click)="exportOrEmailStatement()">
+          <mat-icon class="material-symbols-outlined">upload</mat-icon>
+          <span>Export</span>
+        </button>
+      </div>
+      }
+      <button mat-dialog-close class="modal_close_btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>
+<mat-dialog-content>
+  <div class="doc-viewer-wrapper h-full flex flex-col justify-between relative">
+    @if(_step == 1) {
+    <div [formGroup]="filterForm"
+      class="doc_wrap w-full flex flex-col justify-center items-center gap-2">
+      <div
+        class="by-limit-duration w-auto flex flex-col justify-center items-center gap-2">
+        <div class="by-limit flex justify-center items-center gap-2">
+          <p class="text-lg">Show last</p>
+          <input type="number" class="w-30 h-10 border border-blue-600 rounded"
+            min="1" max="1000" formControlName="_limit"
+            (input)="formValueChange('_limit')">
+          <p class="text-lg">transactions</p>
+        </div>
+        <div class="divider flex justify-center items-center gap-2">
+          <span class="line"></span>
+          <div class="or-circle">OR</div>
+          <span class="line"></span>
+        </div>
+        <div
+          class="by-duration flex flex-col justify-center items-center gap-2">
+          <mat-chip-listbox aria-label="Transaction by duration"
+            formControlName="byDuration"
+            (change)="formValueChange('byDuration')">
+            <mat-chip-option [value]="'last-week'">Last 7 Days</mat-chip-option>
+            <mat-chip-option [value]="'last-month'">Last 30
+              Days</mat-chip-option>
+            <mat-chip-option [value]="'custom-date-range'">Custom Date
+              Range</mat-chip-option>
+          </mat-chip-listbox>
+          <div class="statement-view-datepicker">
+            <mat-form-field appearance="outline">
+              <mat-date-range-input [rangePicker]="rangePicker"
+                (click)="rangePickerClickedFromInput(rangePicker)">
+                <input matStartDate placeholder="Start date"
+                  formControlName="startDate" readonly>
+                <input matEndDate placeholder="End date"
+                  formControlName="endDate" readonly>
+              </mat-date-range-input>
+              <mat-datepicker-toggle matSuffix
+                [disabled]="!filterForm.controls['byDuration'].value?.length || filterForm.controls['byDuration'].value == 'last-week' || filterForm.controls['byDuration'].value == 'last-month'"
+                [for]="rangePicker"></mat-datepicker-toggle>
+              <mat-date-range-picker #rangePicker>
+                <mat-date-range-picker-actions>
+                  <button mat-button matDateRangePickerCancel>Cancel</button>
+                  <button mat-raised-button
+                    matDateRangePickerApply>Apply</button>
+                </mat-date-range-picker-actions>
+              </mat-date-range-picker>
+            </mat-form-field>
+          </div>
+        </div>
+
+      </div>
+      <div class="divider-doubleline"></div>
+      <div
+        class="by-type w-auto flex flex-col justify-center items-center gap-2">
+        <h4>Transaction type</h4>
+        <mat-chip-listbox aria-label="Transaction by type"
+          formControlName="type">
+          <mat-chip-option [value]="''">All</mat-chip-option>
+          <mat-chip-option [value]="'cash-in'">Cash in</mat-chip-option>
+          <mat-chip-option [value]="'cash-out'">Cash out</mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+    <div
+      class="w-full h-auto bg-[#FAF9FD] flex justify-center items-center mt-5">
+      <button
+        [disabled]="filterForm.controls['limit'].value <= 0 && (!filterForm.controls['startDate'].value?.toString()?.length || !filterForm.controls['endDate'].value?.toString()?.length)"
+        class="bg-black !px-10 py-3 text-white rounded-lg"
+        [class.disabled]="filterForm.controls['limit'].value <= 0 && (!filterForm.controls['startDate'].value?.toString()?.length || !filterForm.controls['endDate'].value?.toString()?.length)"
+        (click)="step.set(2); getExpenses(filterForm.value)">Next</button>
+    </div>
+    }
+    @if(_step == 2) {
+    <div
+      class="doc_wrap w-full flex flex-col justify-center items-center gap-2">
+      <p class="mb-2">{{getHeading()}}</p>
+      <div class="transaction-table w-full overflow-auto">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="text-left px-3 py-2"
+                style="background-color: rgb(217, 217, 217);">Date</th>
+              <th class="text-left px-3 py-2"
+                style="background-color: rgb(217, 217, 217);">Category</th>
+              <th class="text-left px-3 py-2"
+                style="background-color: rgb(217, 217, 217);">Description</th>
+              <th class="text-left px-3 py-2"
+                style="background-color: rgb(217, 217, 217);">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (transaction of _expenses; track transaction) {
+            <tr style="border-top: 1px solid rgb(221, 221, 221);">
+              <td class="px-3 py-1 whitespace-nowrap">{{transaction?.date |
+                date: 'dd/MM/yyyy'}}</td>
+              <td class="px-3 py-1 whitespace-nowrap">{{transaction?.category?.name || ''}}</td>
+              <td class="px-3 py-1 whitespace-nowrap"><span
+                  class="inline-block max-w-50 md:max-w-100 lg:max-w-150 overflow-hidden !text-ellipsis">{{transaction?.description || ''}}</span></td>
+              <td class="px-3 py-1 whitespace-nowrap"
+                [ngStyle]="{'color': transaction?.type == 'cash-out' ? 'red' : 'green'}">{{transaction?.type
+                == 'cash-out' ? '-' : '+'}} {{(transaction?.amount || 0) |
+                currency:'INR':'symbol'}}</td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="3" class="px-3 py-10 text-center">No transactions
+                found
+                for the given criteria.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div
+      class="w-full h-auto bg-[#FAF9FD] flex justify-center items-center mt-5">
+      <button
+        class="bg-black !px-10 py-3 text-white rounded-lg"
+        (click)="step.set(1)">Back</button>
+    </div>
+    }
+  </div>
+</mat-dialog-content>
