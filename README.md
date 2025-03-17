@@ -105,19 +105,13 @@ The **Cashlytics** is a user-friendly application designed to help individuals t
 git clone https://github.com/Sayantan5665/Cashlytics-Frontend.git
 ```
 
-2. For frontend go to **Expense-Tracker-Frontend** folder inside **Expense-Tracker-MEAN**
-
-```bash
-cd Expense-Tracker-Frontend
-```
-
-3. Now type **npm install** in terminal to install the dependencies of the project.
+2. Now type **npm install** in terminal to install the dependencies of the project.
 
 ```bash
 npm install
 ```
 
-4. Then **ng serve** to start the frontend.
+3. Then **ng serve** to start the frontend.
 
 ```bash
 ng serve
