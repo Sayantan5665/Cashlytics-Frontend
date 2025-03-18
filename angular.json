@@ -40,7 +40,8 @@
             "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
-            }
+            },
+            "allowedCommonJsDependencies": ["sweetalert2", "mathjs"]
           },
           "configurations": {
             "production": {
