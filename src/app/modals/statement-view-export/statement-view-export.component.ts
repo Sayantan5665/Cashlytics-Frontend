@@ -42,6 +42,7 @@ export class StatementViewExportDialog {
   });
   protected expenses = signal<Array<any>>([]);
   protected sendingMailLoader = signal<boolean>(false);
+  protected exportPdfLoader = signal<boolean>(false);
 
   constructor() { }
 
@@ -193,6 +194,7 @@ export class StatementViewExportDialog {
         }
       });
     } else {
+      this.exportPdfLoader.set(true);
       this.api.downloadPdf(url).subscribe({
         next: (res: Blob) => {
           const blob = new Blob([res], { type: 'application/pdf' });
@@ -202,10 +204,12 @@ export class StatementViewExportDialog {
           a.download = `statement-${new Date().toISOString()}.pdf`;
           a.click();
           URL.revokeObjectURL(url);
+          this.exportPdfLoader.set(false);
         },
         error: (error: any) => {
           console.log("error: ", error);
           this.alert.toast('Failed to export statement', 'error');
+          this.exportPdfLoader.set(false);
         }
       })
     }

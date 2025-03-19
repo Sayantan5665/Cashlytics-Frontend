@@ -15,13 +15,19 @@
             <mat-spinner class="spinner" diameter="20"></mat-spinner>
             <span>Sending...</span>
           } @else {
-          <mat-icon class="material-symbols-outlined">mail</mat-icon>
-          <span>Send over mail</span>
+            <mat-icon class="material-symbols-outlined">mail</mat-icon>
+            <span>Send over mail</span>
           }
         </button>
-        <button type="button" class="download_btn" (click)="exportOrEmailStatement()">
-          <mat-icon class="material-symbols-outlined">upload</mat-icon>
-          <span>Export</span>
+        @let _exportPdfLoader = exportPdfLoader();
+        <button type="button" class="download_btn" (click)="exportOrEmailStatement()" [disabled]="_exportPdfLoader">
+          @if(_exportPdfLoader) {
+            <mat-spinner class="spinner" diameter="20"></mat-spinner>
+            <span>Exporting...</span>
+          } @else {
+            <mat-icon class="material-symbols-outlined">upload</mat-icon>
+            <span>Export</span>
+          }
         </button>
       </div>
       }

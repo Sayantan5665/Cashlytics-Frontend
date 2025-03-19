@@ -33,9 +33,9 @@
           >&rarr;</span></a>
       } @else {
       <button class="example-menu-bar-item -mt-2" cdkMenuItem [cdkMenuTriggerFor]="profileMenu">
-        <img class="w-10 h-10 object-cover border-none rounded-full"
+        <img class="w-10 h-10 object-cover border-none rounded-full" #profileImage
           [src]="_userdetails && _userdetails?.image ? _userdetails.image : '/images/add_picture.jpg'"
-          alt="Profile picture">
+          alt="Profile picture"  (error)="profileImage.src = '/images/add_picture.jpg'">
       </button>
       <ng-template #profileMenu>
         <div class="example-menu" cdkMenu>
