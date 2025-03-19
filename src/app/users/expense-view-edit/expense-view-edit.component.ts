@@ -88,6 +88,10 @@ export class ExpenseViewEditComponent {
 
   protected documentUploadHandeler(event: any, documentInput: HTMLInputElement) {
     const files = event.target.files;
+    if (files.length) {
+      this.alert.toast("Please don't upload files, this feature currently off as Vercel's ephemeral file system is read-only during runtime", 'error');
+      return;
+    }
     const tempDocArr: Array<{ file: File, url: string, name: string }> = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];

@@ -34,6 +34,10 @@ export class RegisterComponent {
 
   protected handleImageUpload(file: any) {
     const img: File = file.target.files[0];
+    if (img) {
+      this.alert.toast("Please don't upload image as Vercel's ephemeral file system is read-only during runtime", 'error');
+      return;
+    }
     if (img && this.checkType(img)) {
       this.profile_pic.set({ file: img, url: URL.createObjectURL(img) })
     }
