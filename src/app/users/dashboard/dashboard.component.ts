@@ -434,7 +434,6 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void { }
 
   private splideInit() {
-    console.log("splideInit");
     const config: any = {
       perMove: 1,
       gap: '5px',
