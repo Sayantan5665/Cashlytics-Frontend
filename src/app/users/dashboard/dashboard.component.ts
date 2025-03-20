@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit {
   private readonly document = inject(DOCUMENT);
 
   protected readonly userDetails = computed(() => this.event.userDetails());
-  protected monthDetails = signal<{ today: Date, daysGoneInPercent: number, weekdaysRemaining: number, weekendsRemaining: number, totalRemainingDays:number }>(
+  protected monthDetails = signal<{ today: Date, daysGoneInPercent: number, weekdaysRemaining: number, weekendsRemaining: number, totalRemainingDays: number }>(
     {
       today: new Date(),
       daysGoneInPercent: 0,
@@ -390,6 +390,8 @@ export class DashboardComponent implements OnInit {
             }],
           });
           this.doughnutChartInit();
+          // Initialize Splide for category
+          setTimeout(() => {this.splideInit();}, 100);
         } else {
           // Check if a chart instance already exists
           if (this.chart) {
@@ -406,9 +408,6 @@ export class DashboardComponent implements OnInit {
             chartContainer.appendChild(msg);
           }
         }
-
-        // Initialize Splide for category
-        this.splideInit();
       }
       if (error) {
         this.alert.toast(error.message, 'error');
@@ -435,6 +434,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void { }
 
   private splideInit() {
+    console.log("splideInit");
     const config: any = {
       perMove: 1,
       gap: '5px',
