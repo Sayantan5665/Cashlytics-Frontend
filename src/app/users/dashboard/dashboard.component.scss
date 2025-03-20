@@ -14,9 +14,17 @@
 
 .text-ellipsis {
   white-space: nowrap;
-  width: 6vw;
+  width: 4.5vw;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  @media (max-width: 1486px) {
+    width: 5.5vw;
+  }
+
+  @media (max-width: 1121px) {
+    width: 7vw;
+  }
 
   @media (max-width: 1050px) {
     width: 8vw;
