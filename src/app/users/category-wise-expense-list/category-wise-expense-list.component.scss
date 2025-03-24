@@ -1,0 +1,9 @@
+.absolute-on-mid {
+  position: relative;
+
+  @media (min-width: 780px) {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}
