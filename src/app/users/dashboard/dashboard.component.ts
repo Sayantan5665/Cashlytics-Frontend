@@ -391,7 +391,7 @@ export class DashboardComponent implements OnInit {
           });
           this.doughnutChartInit();
           // Initialize Splide for category
-          setTimeout(() => {this.splideInit();}, 100);
+          setTimeout(() => {!this.splide && this.splideInit();}, 100);
         } else {
           // Check if a chart instance already exists
           if (this.chart) {
